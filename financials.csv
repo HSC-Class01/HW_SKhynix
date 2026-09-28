@@ -1,0 +1,4 @@
+fiscal_year,period_end,period_type,report_code,report_name,stock_code,revenue,operating_income,net_income,total_assets,current_assets,total_liabilities,current_liabilities,total_equity,cash,cfo,capex,dart_url,source_note
+2023,2023-12-31,annual,bootstrap,사업보고서,000660,32765719,-7730313,-9137547,100330165,30468100,46826413,21007810,53503752,7587329,4278191,8325138,,2025 사업보고서 요약재무정보/연결현금흐름표
+2024,2024-12-31,annual,bootstrap,사업보고서,000660,66192960,23467319,19796902,119855209,42278887,45939505,24965444,73915704,11205117,29795885,15945534,,2025 사업보고서 요약재무정보/연결현금흐름표
+2025,2025-12-31,annual,bootstrap,사업보고서,000660,97146675,47206319,42947902,176107659,69458073,55440908,37378999,120666751,14923766,53373126,27518924,,2025 사업보고서 요약재무정보/연결현금흐름표

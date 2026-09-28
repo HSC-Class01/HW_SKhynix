@@ -1,0 +1,2 @@
+fiscal_year,period_end,period_type,report_code,report_name,stock_code,revenue,operating_income,net_income,dart_url,source_note
+# 2010-2014 legacy rows intentionally left empty. OpenDART financial APIs document coverage from 2015 onward. Populate these rows only after verifying each DART filing.
