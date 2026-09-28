@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SK hynix | DART Financial Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root{--navy:#101d35;--blue:#2563eb;--muted:#64748b;--line:#e5eaf2;--bg:#f5f7fb}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Inter,Pretendard,"Noto Sans KR",sans-serif;color:#17243b}
+header{background:linear-gradient(120deg,#101d35,#1c3765);color:white;padding:34px max(5vw,24px)}header small{color:#b8c9e8;letter-spacing:.12em}h1{margin:8px 0;font-size:30px}.wrap{max-width:1280px;margin:26px auto;padding:0 20px}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.card,.panel{background:white;border:1px solid var(--line);border-radius:15px;padding:20px;box-shadow:0 5px 20px #1c37650b}
+.kpi label{color:var(--muted);font-size:13px}.kpi strong{display:block;font-size:25px;margin:9px 0}.kpi span{font-size:12px;color:var(--muted)}
+.charts{display:grid;grid-template-columns:1.4fr 1fr;gap:14px;margin-top:14px}.panel h2{font-size:17px;margin:0 0 18px}.chartbox{height:290px}
+h2.section{margin:34px 0 12px;font-size:20px}.tablewrap{overflow:auto;background:white;border:1px solid var(--line);border-radius:14px}
+table{border-collapse:collapse;width:100%;font-size:13px;white-space:nowrap}th{background:#f0f4fa;color:#40516d;text-align:right;font-weight:600;padding:13px 14px}td{padding:12px 14px;text-align:right;border-top:1px solid #edf0f5;font-variant-numeric:tabular-nums}th:first-child,td:first-child{text-align:left}tbody tr:hover{background:#f8faff}
+.note{color:var(--muted);font-size:12px;margin:12px 2px 28px}.peer td:first-child{text-align:left}
+@media(max-width:800px){.cards{grid-template-columns:repeat(2,1fr)}.charts{grid-template-columns:1fr}.chartbox{height:240px}}
+</style></head><body>
+<header><small>OPEN DART · FINANCIAL INTELLIGENCE</small><h1>SK hynix 재무 대시보드</h1><div>2010년~최신 공시 · 사업보고서 / 반기보고서 / 분기보고서</div></header>
+<main class="wrap">
+<section class="cards" id="kpis"><div class="card kpi"><label>매출액 · 최신</label><strong>—</strong><span>단위: 원</span></div><div class="card kpi"><label>영업이익 · 최신</label><strong>—</strong><span>단위: 원</span></div><div class="card kpi"><label>영업이익률 · 최신</label><strong>—</strong><span>%</span></div><div class="card kpi"><label>부채비율 · 최신</label><strong>—</strong><span>%</span></div></section>
+<section class="charts"><div class="panel"><h2>연간 매출 및 영업이익 추이</h2><div class="chartbox"><canvas id="trend"></canvas></div></div><div class="panel"><h2>최신 보고서 주요 재무비율</h2><div class="chartbox"><canvas id="ratios"></canvas></div></div></section>
+<div id="tables"></div>
+<h2 class="section">국내 Peer firms</h2><div class="tablewrap"><table class="peer"><thead><tr><th>기업</th><th>종목코드</th><th>비교 맥락</th></tr></thead><tbody>
+<tr><td>삼성전자</td><td>005930</td><td>메모리·시스템 반도체 및 전자 사업</td></tr><tr><td>한미반도체</td><td>042700</td><td>반도체 후공정 장비</td></tr><tr><td>리노공업</td><td>058470</td><td>반도체 검사 부품·소켓</td></tr><tr><td>원익IPS</td><td>240810</td><td>반도체·디스플레이 제조장비</td></tr><tr><td>DB하이텍</td><td>000990</td><td>파운드리·반도체 설계</td></tr></tbody></table></div>
+<p class="note">데이터 출처: 금융감독원 OpenDART. 일부 항목은 보고서 계정명/연결·별도 재무제표 구성에 따라 누락될 수 있습니다. ROE·ROA는 기간말 자본·자산 기준 단순 계산값입니다.</p>
+</main>
+<script>
+const fields=['매출액','영업이익','당기순이익','자산총계','부채총계','자본총계','현금및현금성자산','영업활동현금흐름','영업이익률(%)','순이익률(%)','부채비율(%)','ROE(%)','ROA(%)'];
+const labels={매출액:'매출액',영업이익:'영업이익',당기순이익:'당기순이익',자산총계:'자산총계',부채총계:'부채총계',자본총계:'자본총계',현금및현금성자산:'현금및현금성자산',영업활동현금흐름:'영업활동현금흐름','영업이익률(%)':'영업이익률(%)','순이익률(%)':'순이익률(%)','부채비율(%)':'부채비율(%)','ROE(%)':'ROE(%)','ROA(%)':'ROA(%)'};
+const money=new Set(fields.slice(0,8));
+function fmt(v,k){if(v==null||v==='')return '—';let n=Number(v);return Number.isFinite(n)?(money.has(k)?new Intl.NumberFormat('ko-KR',{maximumFractionDigits:0}).format(n):n.toFixed(2)):'—'}
+function makeTable(title,rows){let h=`<h2 class="section">${title}</h2><div class="tablewrap"><table><thead><tr><th>연도</th><th>보고서</th>${fields.map(x=>`<th>${labels[x]}</th>`).join('')}</tr></thead><tbody>`;
+for(const r of rows)h+=`<tr><td>${r.year??'—'}</td><td>${r.report_name||r.period_type||'—'}</td>${fields.map(k=>`<td>${fmt(r[k],k)}</td>`).join('')}</tr>`;
+return h+'</tbody></table></div>'}
+fetch('data/financials.json').then(r=>r.ok?r.json():Promise.reject()).then(rows=>{
+const groups=[['Annual','annual'],['Half-year','half-year'],['Quarterly','quarterly']];
+document.getElementById('tables').innerHTML=groups.map(([t,g])=>makeTable(t,rows.filter(r=>r.period_type===g))).join('');
+const latest=rows[rows.length-1];if(latest){let vals=[latest['매출액'],latest['영업이익'],latest['영업이익률(%)'],latest['부채비율(%)']];document.querySelectorAll('#kpis strong').forEach((e,i)=>e.textContent=fmt(vals[i],i<2?fields[i]:fields[i+8]));}
+const annual=rows.filter(r=>r.period_type==='annual');new Chart(document.getElementById('trend'),{type:'line',data:{labels:annual.map(r=>r.year),datasets:[{label:'매출액',data:annual.map(r=>Number(r['매출액'])/1e12),borderColor:'#2563eb',tension:.25},{label:'영업이익',data:annual.map(r=>Number(r['영업이익'])/1e12),borderColor:'#14b8a6',tension:.25}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}},scales:{y:{title:{display:true,text:'조 원'}}}}});
+new Chart(document.getElementById('ratios'),{type:'bar',data:{labels:['영업이익률','순이익률','ROE','ROA','부채비율'],datasets:[{data:[latest?.['영업이익률(%)'],latest?.['순이익률(%)'],latest?.['ROE(%)'],latest?.['ROA(%)'],latest?.['부채비율(%)']].map(Number),backgroundColor:['#2563eb','#14b8a6','#64748b','#94a3b8','#f59e0b'],borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});
+}).catch(()=>{document.getElementById('tables').innerHTML='<p class="note">아직 데이터가 없습니다. GitHub Actions에서 DART 수집 워크플로우를 실행하세요.</p>'});
+</script></body></html>
