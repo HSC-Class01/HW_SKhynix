@@ -1,0 +1,18 @@
+sk_agent/
+├── .github/
+│   └── workflows/
+│       └── update-and-deploy.yml
+├── data/
+│   ├── financials.csv
+│   ├── status.json
+│   ├── README.md
+│   ├── manual/
+│   │   └── legacy_2010_2014.csv
+│   └── raw/
+├── docs/
+│   └── dashboard-badge.svg
+├── src/
+│   └── update_data.py
+├── index.html
+├── requirements.txt
+└── README.md
