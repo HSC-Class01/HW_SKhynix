@@ -27,3 +27,5 @@ def main():
     out['gross_margin']=out.gross_profit/out.revenue;out['operating_margin']=out.operating_income/out.revenue;out['net_margin']=out.net_income/out.revenue;out['current_ratio']=out.current_assets/out.current_liabilities;out['debt_ratio']=out.total_liabilities/out.total_equity;out['equity_ratio']=out.total_equity/out.total_assets;out['fcf']=out.cfo-out.capex.abs();out['cfo_to_net_income']=out.cfo/out.net_income
     out=out.drop_duplicates(['fiscal_year','period_type','period_end'],keep='last').sort_values(['period_end','period_type']);out.to_csv(p,index=False,encoding='utf-8-sig')
 if __name__=='__main__': main()
+
+# Monthly workflow entrypoint: standalone quarterly normalization runs after OpenDART collection.
