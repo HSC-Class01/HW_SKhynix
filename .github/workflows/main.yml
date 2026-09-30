@@ -49,6 +49,7 @@ jobs:
             echo "No data changes."
           else
             git commit -m "chore: update SK hynix DART financial data"
+            git pull --rebase origin main
             git push
           fi
 
