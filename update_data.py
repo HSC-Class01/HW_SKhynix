@@ -4,7 +4,7 @@ from datetime import datetime
 import requests
 import pandas as pd
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parent
 DATA = ROOT / 'data'
 RAW = DATA / 'raw'
 MANUAL = DATA / 'manual'
