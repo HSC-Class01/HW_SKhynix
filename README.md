@@ -17,7 +17,7 @@ DART/OpenDART를 이용해 **SK hynix (000660)**의 사업보고서·반기보�
 - 우측 floating PDF/Excel 다운로드 패널
 
 ## 2010년 데이터
-OpenDART의 구조화된 단일회사 주요계정/전체 재무제표 API는 **2015년 이후 사업연도**부터 정보를 제공합니다. 따라서 2010~2014년을 같은 API endpoint로 자동 복원할 수 없습니다. 이 저장소는 임의 추정 대신 `data/manual/legacy_2010_2014.csv`를 별도 레이어로 두었습니다.
+OpenDART의 정기보고서·재무 API는 **2015년 이후**를 제공하므로 2010~2014년 재무수치는 동일 API로 자동 복원할 수 없습니다. 다만 DART 원문/원본파일은 별도 경로로 존재하므로, 검증된 2010~2014년 수치를 `data/manual/legacy_2010_2014.csv`에 넣으면 이후 자동 파이프라인에 통합됩니다. 이 저장소는 임의 추정 대신 `data/manual/legacy_2010_2014.csv`를 별도 레이어로 두었습니다. 자동화는 2015년 이후를 OpenDART API로 수집하고, 2010~2014년은 검증된 backfill을 보존하는 방식입니다.
 
 2010~2014년 DART 원문을 검증한 뒤 동일한 컬럼 구조로 입력하면 agent가 자동 통합합니다. 레거시 값은 `DART legacy/manual`로 표시합니다. DART는 공시 원문 XML과 XBRL 원본 파일도 별도로 제공합니다.
 
@@ -47,7 +47,7 @@ python update_data.py
 ## 자동 업데이트
 `.github/workflows/main.yml`은 **매월 1일 09:20 KST (00:20 UTC)**에 실행됩니다. `workflow_dispatch` 수동 실행도 지원하며 코드 변경 시에도 실행됩니다.
 
-순서: DART 수집 → raw JSON 저장 → normalized CSV/ratios 생성 → 변경 데이터 commit → GitHub Pages 배포.
+순서: DART 정기보고서 인덱스 수집 → 2015년 이후 구조화 재무데이터 수집 → raw JSON 저장 → standalone quarter 계산 → CSV/비율 생성 → 변경 데이터 commit → GitHub Pages 배포.
 
 ## GitHub Pages
 **Settings → Pages → Build and deployment → Source: GitHub Actions**를 확인합니다.
@@ -60,7 +60,7 @@ GitHub 저장소의 오른쪽 **About → Edit repository details → Website**�
 
 `https://HSC-Class01.github.io/HW_SKhynix/`
 
-현재 연결된 GitHub 도구에는 repository metadata의 homepage 필드를 직접 수정하는 기능이 노출되어 있지 않아 이 항목은 GitHub 화면에서 한 번 설정해야 합니다.
+현재 GitHub 연결 권한에는 repository metadata의 Homepage 필드를 수정하는 기능이 노출되어 있지 않아, **About → Edit repository details → Website**만 GitHub 화면에서 한 번 설정해야 합니다.
 
 ## 국내 Peer Firms
 | 기업 | 종목코드 | 비교 맥락 |
@@ -104,3 +104,19 @@ HW_SKhynix/
 - Asset turnover = Revenue / Total assets
 
 OpenDART 원문과 대조하여 연구·분석에 사용하시기 바랍니다. 이 저장소는 투자판단을 대신하지 않습니다.
+
+
+## 데이터 범위와 공식 API 근거
+- OpenDART 정기보고서 재무 API의 사업연도 조회는 2015년부터 제공됩니다.
+- 사업보고서: `11011`, 반기보고서: `11012`, 1분기보고서: `11013`, 3분기보고서: `11014`.
+- 공시서류 원본파일 API는 접수번호(`rcept_no`)를 이용해 원본파일 ZIP을 받을 수 있습니다.
+- 공식 개발가이드: https://opendart.fss.or.kr/guide/detail.do?apiGrpCd=DE002&apiId=AE00030
+- 공식 공시서류 원본파일 가이드: https://opendart.fss.or.kr/guide/detail.do?apiGrpCd=DS001&apiId=2019003
+
+### 2010~2014 backfill
+2010~2014년은 OpenDART 구조화 재무 API의 제공 범위 밖입니다. 따라서 숫자를 임의 생성하지 않고, DART 원문에서 검증한 값을 다음 형식으로 입력하도록 설계했습니다.
+
+`data/manual/legacy_2010_2014.csv`
+
+필수 권장 컬럼: `fiscal_year, period_end, period_type, period_label, report_name, stock_code, revenue, operating_income, net_income, total_assets, total_liabilities, total_equity, cash, cfo, capex, dart_url, source_note`
+
