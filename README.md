@@ -14,7 +14,6 @@ DART/OpenDART를 이용해 **SK hynix (000660)**의 사업보고서·반기보�
 - GitHub Actions 매월 1일 자동 실행 및 GitHub Pages 자동 배포
 - 상단 KPI/그래프 + Annual/Half-year/Quarterly 전체 표
 - 국내 Peer Firms 표
-- 우측 floating PDF/Excel 다운로드 패널
 
 ## 2010년 데이터
 OpenDART의 정기보고서·재무 API는 **2015년 이후**를 제공하므로 2010~2014년 재무수치는 동일 API로 자동 복원할 수 없습니다. 다만 DART 원문/원본파일은 별도 경로로 존재하므로, 검증된 2010~2014년 수치를 `data/manual/legacy_2010_2014.csv`에 넣으면 이후 자동 파이프라인에 통합됩니다. 이 저장소는 임의 추정 대신 `data/manual/legacy_2010_2014.csv`를 별도 레이어로 두었습니다. 자동화는 2015년 이후를 OpenDART API로 수집하고, 2010~2014년은 검증된 backfill을 보존하는 방식입니다.
@@ -70,10 +69,6 @@ GitHub 저장소의 오른쪽 **About → Edit repository details → Website**�
 | DB하이텍 | 000990 | 파운드리 중심 반도체 제조 |
 | 원익IPS | 240810 | 반도체·디스플레이 제조장비 |
 | 주성엔지니어링 | 036930 | 반도체·디스플레이 증착 장비 |
-
-## 다운로드
-- **PDF**: 현재 대시보드 화면을 PDF로 저장
-- **Excel**: Annual / Half-year / Quarterly 선택 후 해당 기간 데이터 다운로드
 
 ## 구조
 ```text
