@@ -1,18 +1,65 @@
-sk_agent/
-├── .github/
-│   └── workflows/
-│       └── update-and-deploy.yml
-├── data/
-│   ├── financials.csv
-│   ├── status.json
-│   ├── README.md
-│   ├── manual/
-│   │   └── legacy_2010_2014.csv
-│   └── raw/
-├── docs/
-│   └── dashboard-badge.svg
-├── src/
-│   └── update_data.py
-├── index.html
-├── requirements.txt
-└── README.md
+name: DART Update and GitHub Pages Deploy
+
+on:
+  schedule:
+    - cron: '20 0 1 * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'update_data.py'
+      - 'index.html'
+      - 'requirements.txt'
+      - '.github/workflows/main.yml'
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Collect DART data
+        env:
+          DART_API_KEY: ${{ secrets.DART_API_KEY }}
+          DART_CORP_CODE: '00164779'
+          START_YEAR: '2015'
+          SAVE_RAW_JSON: 'true'
+        run: python update_data.py
+      - name: Commit data
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/
+          if git diff --cached --quiet; then
+            echo 'No data changes.'
+          else
+            git commit -m "chore: update SK hynix DART financial data"
+            git push
+          fi
+
+  deploy:
+    needs: update
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: main}
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
