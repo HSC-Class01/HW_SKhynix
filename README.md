@@ -120,3 +120,21 @@ OpenDART 원문과 대조하여 연구·분석에 사용하시기 바랍니다. 
 
 필수 권장 컬럼: `fiscal_year, period_end, period_type, period_label, report_name, stock_code, revenue, operating_income, net_income, total_assets, total_liabilities, total_equity, cash, cfo, capex, dart_url, source_note`
 
+
+
+## Agent 실행
+
+전체 수집과 분기 정규화를 한 번에 실행하려면 `agent.py`를 사용합니다.
+
+- GitHub Actions: 매월 1일 09:20 KST 자동 실행
+- 수동 실행: Actions → SK hynix DART Update and GitHub Pages → Run workflow
+- 로컬: `python agent.py`
+- 인증키: GitHub Actions Secret `DART_API_KEY`
+
+2010~2014년은 OpenDART 구조화 재무 API 제공범위 밖이므로 Agent가 임의의 숫자를 생성하지 않습니다. 검증된 DART 원문/XBRL 값이 `data/manual/legacy_2010_2014.csv`에 있으면 자동 병합됩니다.
+
+## Repository 구성
+
+`agent.py` → `update_data.py` → `normalize_quarters.py` → `data/financials.csv` → `index.html`
+
+대시보드는 Annual / Half-year / Quarterly 세 표와 Peer Firms 표를 제공하며, 상단에는 KPI 및 추이 그래프를 배치합니다.
