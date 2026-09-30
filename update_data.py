@@ -6,9 +6,9 @@ import pandas as pd
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 ROOT=Path(__file__).resolve().parent; DATA=ROOT/"data"; RAW=DATA/"raw"; MANUAL=DATA/"manual"
-RAW.mkdir(parents=True,exist_ok=True); MANUAL.mkdir(parents=True,exist_ok=True)
+RAW.mkdir(parents=True,exist_ok=True); MANUAL.mkdir(parents=True,exist_ok=True); (DATA/"reports").mkdir(parents=True,exist_ok=True)
 API_KEY=os.getenv("DART_API_KEY","").strip(); CORP_CODE=os.getenv("DART_CORP_CODE","00164779").strip()
-STOCK_CODE="000660"; START_YEAR=int(os.getenv("START_YEAR","2015")); END_YEAR=datetime.now().year
+STOCK_CODE="000660"; START_YEAR=int(os.getenv("START_YEAR","2010")); END_YEAR=datetime.now().year
 BASE="https://opendart.fss.or.kr/api"
 REPORTS={"11011":"annual","11012":"half","11013":"quarterly","11014":"quarterly"}
 REPORT_NAMES={"11011":"사업보고서","11012":"반기보고서","11013":"1분기보고서","11014":"3분기보고서"}
