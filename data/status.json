@@ -1,0 +1,8 @@
+{
+  "updated_at_utc": "not_run",
+  "rows": 0,
+  "start_year": 2015,
+  "latest_period": null,
+  "source": "OpenDART",
+  "note": "OpenDART structured financial APIs provide financial information from 2015 onward; 2010-2014 requires verified legacy DART filing import."
+}
