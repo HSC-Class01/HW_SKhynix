@@ -9,7 +9,6 @@ on:
     paths:
       - "update_data.py"
       - "normalize_quarters.py"
-      - "agent.py"
       - "index.html"
       - "requirements.txt"
       - ".github/workflows/main.yml"
@@ -21,7 +20,7 @@ permissions:
 
 concurrency:
   group: sk-hynix-dashboard
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   update:
@@ -38,8 +37,10 @@ jobs:
         env:
           DART_API_KEY: ${{ secrets.DART_API_KEY }}
           DART_CORP_CODE: "00164779"
-          START_YEAR: "2010"
-        run: python agent.py
+          START_YEAR: "2015"
+        run: python update_data.py
+      - name: Normalize standalone quarters
+        run: python normalize_quarters.py
       - name: Commit updated data
         run: |
           git config user.name "github-actions[bot]"
