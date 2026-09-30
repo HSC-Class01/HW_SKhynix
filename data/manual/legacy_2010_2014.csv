@@ -1,3 +1,1 @@
-# OpenDART structured financial APIs provide structured financial information from 2015 onward.
-# Populate verified DART legacy values for 2010-2014; never insert estimates.
 fiscal_year,period_end,period_type,period_label,report_name,stock_code,revenue,operating_income,net_income,total_assets,total_liabilities,total_equity,cash,cfo,capex,dart_url,source_note
