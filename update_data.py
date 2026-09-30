@@ -158,7 +158,7 @@ def main():
     # Preserve user-provided/manual legacy observations if present.
     legacy = MANUAL / 'legacy_2010_2014.csv'
     if legacy.exists() and legacy.stat().st_size:
-        leg = pd.read_csv(legacy)
+        leg = pd.read_csv(legacy, comment='#')
     else:
         leg = pd.DataFrame()
     fresh = pd.DataFrame(rows)
