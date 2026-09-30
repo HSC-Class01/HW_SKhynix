@@ -3,6 +3,7 @@ from pathlib import Path
 from datetime import datetime
 import requests
 import pandas as pd
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 ROOT = Path(__file__).resolve().parent
 DATA = ROOT / 'data'
@@ -142,37 +143,64 @@ def collect_report_index():
     if rows:
         pd.DataFrame(rows).drop_duplicates('rcept_no').sort_values('report_date').to_csv(DATA/'reports.csv',index=False,encoding='utf-8-sig')
 
+def safe_fetch(year, report):
+    try:
+        return fetch_year(year, report)
+    except Exception as exc:
+        print(f"[WARN] {year} {report}: {exc}")
+        return None
+
 def main():
     if not API_KEY:
-        raise SystemExit('DART_API_KEY is required. Add it as a GitHub Actions repository secret or environment variable.')
-    rows=[]
-    for year in range(START_YEAR, END_YEAR+1):
-        for report in REPORTS:
-            try:
-                item = fetch_year(year, report)
-                if item: rows.append(item)
-                time.sleep(0.12)
-            except Exception as e:
-                print(f'[WARN] {year} {report}: {e}')
+        raise SystemExit("DART_API_KEY is required. Add it to GitHub Actions secrets.")
+
+    rows = []
+    jobs = [(year, report) for year in range(START_YEAR, END_YEAR + 1) for report in REPORTS]
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        futures = [pool.submit(safe_fetch, year, report) for year, report in jobs]
+        for future in as_completed(futures):
+            item = future.result()
+            if item:
+                rows.append(item)
+
     collect_report_index()
-    # Preserve user-provided/manual legacy observations if present.
-    legacy = MANUAL / 'legacy_2010_2014.csv'
-    if legacy.exists() and legacy.stat().st_size:
-        leg = pd.read_csv(legacy, comment='#')
-    else:
-        leg = pd.DataFrame()
     fresh = pd.DataFrame(rows)
+
+    legacy = MANUAL / 'legacy_2010_2014.csv'
+    leg = pd.read_csv(legacy, comment='#') if legacy.exists() and legacy.stat().st_size else pd.DataFrame()
+
+    if not fresh.empty:
+        annual = fresh[fresh.period_type == 'annual'].copy()
+        annual['period_label'] = annual.fiscal_year.astype(str)
+        half = fresh[fresh.period_type == 'half'].copy()
+        half['period_label'] = half.fiscal_year.astype(str) + ' H1'
+        quarterly = fresh[fresh.period_type == 'quarterly'].copy()
+        quarterly['period_label'] = quarterly.period_end.str.slice(0,4) + ' ' + quarterly.report_code.map({'11013':'Q1','11014':'Q3'}).fillna('')
+        fresh = pd.concat([annual, half, quarterly], ignore_index=True, sort=False)
+
     if not fresh.empty and not leg.empty:
         all_df = pd.concat([leg, fresh], ignore_index=True, sort=False)
+    elif not fresh.empty:
+        all_df = fresh
     else:
-        all_df = fresh if not fresh.empty else leg
+        all_df = leg
+
     if all_df.empty:
-        raise SystemExit('No financial rows were returned.')
+        raise SystemExit("No financial rows were returned. Check DART_API_KEY and the corporation code.")
+
     all_df = add_derived(all_df)
-    all_df = all_df.drop_duplicates(subset=['fiscal_year','period_type','period_end'], keep='last').sort_values(['period_end','period_type'])
+    all_df = all_df.drop_duplicates(subset=['fiscal_year','period_type','period_end'], keep='last')
+    all_df = all_df.sort_values(['period_end','period_type'])
+    DATA.mkdir(parents=True, exist_ok=True)
     all_df.to_csv(DATA / 'financials.csv', index=False, encoding='utf-8-sig')
-    summary = {'updated_at_utc':datetime.utcnow().isoformat(timespec='seconds')+'Z','rows':len(all_df),'start_year':int(all_df.fiscal_year.min()),'latest_period':str(all_df.period_end.max())}
+    summary = {
+        'updated_at_utc': datetime.utcnow().isoformat(timespec='seconds') + 'Z',
+        'rows': len(all_df),
+        'start_year': int(pd.to_numeric(all_df.fiscal_year, errors='coerce').min()),
+        'latest_period': str(all_df.period_end.max())
+    }
     (DATA / 'status.json').write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding='utf-8')
     print(json.dumps(summary, ensure_ascii=False))
 
-if __name__ == '__main__': main()
+if __name__ == '__main__':
+    main()
