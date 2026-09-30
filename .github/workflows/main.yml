@@ -42,16 +42,33 @@ jobs:
         run: python agent.py
       - name: Commit updated data
         run: |
+          set -e
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/
           if git diff --cached --quiet; then
             echo "No data changes."
-          else
-            git commit -m "chore: update SK hynix DART financial data"
-            git pull --rebase origin main
-            git push
+            exit 0
           fi
+
+          git commit -m "chore: update SK hynix DART financial data"
+
+          # The scheduled collector can overlap with a workflow triggered by a
+          # source-code change. Rebase the generated data commit onto the
+          # newest main while preferring the freshly collected data on conflict.
+          for attempt in 1 2 3; do
+            git fetch origin main
+            if git rebase -X theirs origin/main; then
+              if git push origin HEAD:main; then
+                exit 0
+              fi
+            fi
+            git rebase --abort || true
+            sleep 5
+          done
+
+          echo "Failed to publish generated DART data after 3 attempts."
+          exit 1
 
   deploy:
     needs: update
